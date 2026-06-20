@@ -1,0 +1,75 @@
+// Local enum definitions matching Prisma schema
+// These are used in client components and anywhere Prisma client can't be imported
+
+export const MembershipCategory = {
+  STUDENT: "STUDENT",
+  TECHNICIAN: "TECHNICIAN",
+  NON_TECHNICAL: "NON_TECHNICAL",
+  CORPORATE: "CORPORATE",
+} as const;
+
+export type MembershipCategory = (typeof MembershipCategory)[keyof typeof MembershipCategory];
+
+export const ApplicationStatus = {
+  PENDING: "PENDING",
+  UNDER_REVIEW: "UNDER_REVIEW",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  SUSPENDED: "SUSPENDED",
+} as const;
+
+export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
+
+export const ExpertiseArea = {
+  DOMESTIC_AC_HEAT_PUMPS: "DOMESTIC_AC_HEAT_PUMPS",
+  COMMERCIAL_REFRIGERATION: "COMMERCIAL_REFRIGERATION",
+  INDUSTRIAL_CHILLING: "INDUSTRIAL_CHILLING",
+  VENTILATION_AIR_EXTRACTION: "VENTILATION_AIR_EXTRACTION",
+  VRF_SYSTEMS: "VRF_SYSTEMS",
+  OTHER: "OTHER",
+} as const;
+
+export type ExpertiseArea = (typeof ExpertiseArea)[keyof typeof ExpertiseArea];
+
+export const RefrigerantCertification = {
+  NATURAL_HYDROCARBONS: "NATURAL_HYDROCARBONS",
+  R32: "R32",
+  STANDARD_HFCS: "STANDARD_HFCS",
+} as const;
+
+export type RefrigerantCertification = (typeof RefrigerantCertification)[keyof typeof RefrigerantCertification];
+
+export const CareerInterest = {
+  CONTRACTING_SERVICE: "CONTRACTING_SERVICE",
+  MANUFACTURING: "MANUFACTURING",
+  ENGINEERING_DESIGN: "ENGINEERING_DESIGN",
+  SALES_DISTRIBUTION: "SALES_DISTRIBUTION",
+} as const;
+
+export type CareerInterest = (typeof CareerInterest)[keyof typeof CareerInterest];
+
+export const SectorFocus = {
+  EQUIPMENT_DISTRIBUTION: "EQUIPMENT_DISTRIBUTION",
+  COMPONENT_SPARE_PARTS: "COMPONENT_SPARE_PARTS",
+  ADMINISTRATIVE_CONSULTING: "ADMINISTRATIVE_CONSULTING",
+} as const;
+
+export type SectorFocus = (typeof SectorFocus)[keyof typeof SectorFocus];
+
+export const JoiningReason = {
+  TECHNICAL_SEMINARS_CPD: "TECHNICAL_SEMINARS_CPD",
+  PROFESSIONAL_NETWORKING_B2B: "PROFESSIONAL_NETWORKING_B2B",
+  INDUSTRY_REGULATION_UPDATES: "INDUSTRY_REGULATION_UPDATES",
+  SUBMITTING_DATA_MARKET_INSIGHTS: "SUBMITTING_DATA_MARKET_INSIGHTS",
+} as const;
+
+export type JoiningReason = (typeof JoiningReason)[keyof typeof JoiningReason];
+
+export const CoreBusinessActivity = {
+  HVACR_CONTRACTOR: "HVACR_CONTRACTOR",
+  EQUIPMENT_MANUFACTURER: "EQUIPMENT_MANUFACTURER",
+  WHOLESALER_DISTRIBUTOR: "WHOLESALER_DISTRIBUTOR",
+  CONSULTING_ENGINEERS: "CONSULTING_ENGINEERS",
+} as const;
+
+export type CoreBusinessActivity = (typeof CoreBusinessActivity)[keyof typeof CoreBusinessActivity];

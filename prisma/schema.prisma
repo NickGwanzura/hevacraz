@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MembershipCategory {
+  STUDENT
+  TECHNICIAN
+  NON_TECHNICAL
+  CORPORATE
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ExpertiseArea {
+  DOMESTIC_AC_HEAT_PUMPS
+  COMMERCIAL_REFRIGERATION
+  INDUSTRIAL_CHILLING
+  VENTILATION_AIR_EXTRACTION
+  VRF_SYSTEMS
+  OTHER
+}
+
+enum RefrigerantCertification {
+  NATURAL_HYDROCARBONS
+  R32
+  STANDARD_HFCS
+}
+
+enum CareerInterest {
+  CONTRACTING_SERVICE
+  MANUFACTURING
+  ENGINEERING_DESIGN
+  SALES_DISTRIBUTION
+}
+
+enum SectorFocus {
+  EQUIPMENT_DISTRIBUTION
+  COMPONENT_SPARE_PARTS
+  ADMINISTRATIVE_CONSULTING
+}
+
+enum JoiningReason {
+  TECHNICAL_SEMINARS_CPD
+  PROFESSIONAL_NETWORKING_B2B
+  INDUSTRY_REGULATION_UPDATES
+  SUBMITTING_DATA_MARKET_INSIGHTS
+}
+
+enum CoreBusinessActivity {
+  HVACR_CONTRACTOR
+  EQUIPMENT_MANUFACTURER
+  WHOLESALER_DISTRIBUTOR
+  CONSULTING_ENGINEERS
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String   @default("admin")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  adminNotes AdminNote[]
+  auditLogs AuditLog[]
+}
+
+model MemberApplication {
+  id                 String            @id @default(cuid())
+  membershipNumber   String?           @unique
+  status             ApplicationStatus @default(PENDING)
+  firstName          String
+  lastName           String
+  email              String
+  phone              String
+  address            String
+  category           MembershipCategory
+  declaration        Boolean           @default(false)
+  signatureName      String
+  applicationDate    DateTime          @default(now())
+  approvalDate       DateTime?
+  rejectionDate      DateTime?
+  reviewedBy         String?
+
+  // Joining reasons (stored as JSON array of enums)
+  joiningReasons     String            @default("[]")
+
+  // Category-specific relations
+  technicianProfile   TechnicianProfile?
+  studentProfile      StudentProfile?
+  nonTechnicalProfile NonTechnicalProfile?
+  corporateProfile    CorporateProfile?
+
+  adminNotes AdminNote[]
+
+  @@map("member_applications")
+}
+
+model TechnicianProfile {
+  id                         String                @id @default(cuid())
+  applicationId              String                @unique
+  qualifications             String
+  yearsOfExperience          Int
+  expertiseAreas             String                @default("[]")
+  refrigerantCertifications  String                @default("[]")
+
+  application MemberApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("technician_profiles")
+}
+
+model StudentProfile {
+  id                  String          @id @default(cuid())
+  applicationId       String          @unique
+  institution         String
+  programme           String
+  expectedGraduation  DateTime
+  careerInterest      CareerInterest
+
+  application MemberApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("student_profiles")
+}
+
+model NonTechnicalProfile {
+  id              String          @id @default(cuid())
+  applicationId   String          @unique
+  jobTitle        String
+  employer        String
+  sectorFocus     SectorFocus
+  joiningGoal     String
+
+  application MemberApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("non_technical_profiles")
+}
+
+model CorporateProfile {
+  id                        String                @id @default(cuid())
+  applicationId             String                @unique
+  companyName               String
+  coreBusinessActivity      CoreBusinessActivity
+  totalEmployees            Int
+  activeFieldTechnicians    Int
+  regulatoryAffiliations    String                @default("")
+  representativeName        String
+  representativeEmail       String
+
+  application MemberApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("corporate_profiles")
+}
+
+model AdminNote {
+  id          String   @id @default(cuid())
+  applicationId String
+  adminId     String
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  application MemberApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  admin       User              @relation(fields: [adminId], references: [id])
+
+  @@map("admin_notes")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String
+  adminId     String
+  details     String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@map("audit_logs")
+}
