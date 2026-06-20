@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -8,9 +9,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center font-bold text-lg transition-transform group-hover:scale-105">
-                H
-              </div>
+              <Image src="/logo.jpg" alt="HEVACRAZ" width={40} height={40}
+                className="rounded-xl transition-transform group-hover:scale-105" />
               <div>
                 <h1 className="text-xl font-bold leading-tight">HEVACRAZ</h1>
                 <p className="text-[11px] text-teal-300 leading-tight">Membership Registry</p>
@@ -226,11 +226,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid sm:grid-cols-3 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center font-bold text-sm text-white">
-                  H
-                </div>
-                <span className="font-bold text-white text-lg">HEVACRAZ</span>
+            <div className="flex items-center gap-2 mb-3">
+              <Image src="/logo.jpg" alt="HEVACRAZ" width={32} height={32}
+                className="rounded-lg" />
+              <span className="font-bold text-white text-lg">HEVACRAZ</span>
               </div>
               <p className="text-sm text-teal-300/70 leading-relaxed">
                 Heating, Ventilation, Air Conditioning and Refrigeration Association of Zambia

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { submitApplication } from "@/actions/submit-application";
 import {
   MEMBERSHIP_CATEGORIES,
@@ -219,7 +220,8 @@ export default function ApplyPage() {
       <div className="bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#0f3b5e] rounded-lg flex items-center justify-center font-bold text-sm text-white">H</div>
+            <Image src="/logo.jpg" alt="HEVACRAZ" width={32} height={32}
+              className="rounded-lg" />
             <span className="text-sm font-semibold text-[#0f3b5e]">HEVACRAZ Application</span>
           </div>
           <span className="text-xs text-gray-400">Step {step} of 3</span>

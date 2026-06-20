@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -35,8 +36,9 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm animate-scale-in">
         {/* Branding */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#0f3b5e] to-[#1a5a8a] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#0f3b5e]/20">
-            <span className="text-white font-bold text-2xl">H</span>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg shadow-[#0f3b5e]/20">
+            <Image src="/logo.jpg" alt="HEVACRAZ" width={64} height={64}
+              className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-[#0f3b5e]">Admin Dashboard</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to manage the membership registry</p>

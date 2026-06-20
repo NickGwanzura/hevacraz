@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignOutButton } from "./sign-out";
@@ -24,9 +25,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-6">
               <Link href="/admin" className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-105">
-                  H
-                </div>
+                <Image src="/logo.jpg" alt="HEVACRAZ" width={32} height={32}
+                  className="rounded-lg transition-transform group-hover:scale-105" />
                 <span className="font-semibold text-sm hidden sm:block">HEVACRAZ Admin</span>
               </Link>
               <nav className="hidden sm:flex items-center gap-1">
