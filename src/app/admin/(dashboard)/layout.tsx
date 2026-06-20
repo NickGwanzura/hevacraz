@@ -27,7 +27,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
               <Link href="/admin" className="flex items-center gap-2.5 group">
                 <Image src="/logo.jpg" alt="HEVACRAZ" width={32} height={32}
                   className="rounded-lg transition-transform group-hover:scale-105" />
-                <span className="font-semibold text-sm hidden sm:block">HEVACRAZ Admin</span>
+                <span className="font-semibold text-sm hidden sm:block font-sans">HEVACRAZ Admin</span>
               </Link>
               <nav className="hidden sm:flex items-center gap-1">
                 {navItems.map((item) => {

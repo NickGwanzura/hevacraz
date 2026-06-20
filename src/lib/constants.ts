@@ -12,8 +12,8 @@ import {
 export const MEMBERSHIP_CATEGORIES = [
   { value: MembershipCategory.STUDENT, label: "Student" },
   { value: MembershipCategory.TECHNICIAN, label: "Technician" },
-  { value: MembershipCategory.NON_TECHNICAL, label: "Non-Technical Professional" },
-  { value: MembershipCategory.CORPORATE, label: "Corporate / Company" },
+  { value: MembershipCategory.NON_TECHNICAL, label: "Non Technical Professional" },
+  { value: MembershipCategory.CORPORATE, label: "Corporate Company" },
 ] as const;
 
 export const APPLICATION_STATUSES = [
@@ -76,8 +76,8 @@ export const CATEGORY_CODE: Record<MembershipCategory, string> = {
 export const CATEGORY_LABEL: Record<MembershipCategory, string> = {
   [MembershipCategory.TECHNICIAN]: "Technician",
   [MembershipCategory.STUDENT]: "Student",
-  [MembershipCategory.NON_TECHNICAL]: "Non-Technical Professional",
-  [MembershipCategory.CORPORATE]: "Corporate / Company",
+  [MembershipCategory.NON_TECHNICAL]: "Non Technical Professional",
+  [MembershipCategory.CORPORATE]: "Corporate Company",
 };
 
 export const STATUS_LABEL: Record<ApplicationStatus, string> = {

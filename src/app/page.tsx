@@ -54,7 +54,7 @@ export default function Home() {
             </h2>
             <p className="text-lg sm:text-xl text-teal-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
               The Heating, Ventilation, Air Conditioning and Refrigeration Association of Zambia
-              — uniting professionals and companies across the HVAC-R industry.
+              uniting professionals and companies across the HVACR industry.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -104,7 +104,7 @@ export default function Home() {
                   bg: "bg-blue-50",
                 },
                 {
-                  title: "Non-Technical",
+                  title: "Non Technical",
                   desc: "For professionals in distribution, supply, and consulting roles.",
                   icon: "💼",
                   color: "from-amber-500 to-orange-600",
@@ -112,7 +112,7 @@ export default function Home() {
                 },
                 {
                   title: "Corporate",
-                  desc: "For registered organizations in the HVAC-R industry.",
+                  desc: "For registered organizations in the HVACR industry.",
                   icon: "🏢",
                   color: "from-teal-500 to-emerald-600",
                   bg: "bg-teal-50",
@@ -248,8 +248,8 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li className="hover:text-white transition-colors">Student</li>
                 <li className="hover:text-white transition-colors">Technician</li>
-                <li className="hover:text-white transition-colors">Non-Technical Professional</li>
-                <li className="hover:text-white transition-colors">Corporate / Company</li>
+                <li className="hover:text-white transition-colors">Non Technical Professional</li>
+                <li className="hover:text-white transition-colors">Corporate Company</li>
               </ul>
             </div>
           </div>

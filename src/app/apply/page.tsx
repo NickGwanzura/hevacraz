@@ -319,7 +319,7 @@ export default function ApplyPage() {
             </div>
           )}
 
-          {/* Step 2 — Non-Technical */}
+          {/* Step 2 — Non Technical */}
           {step === 2 && cat === MembershipCategory.NON_TECHNICAL && (
             <div className="space-y-5 animate-slide-up">
               <InputField label="Current Job Title" value={formData.jobTitle} onChange={(v) => update("jobTitle", v)} error={errors.jobTitle} />

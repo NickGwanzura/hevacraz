@@ -142,7 +142,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
           )}
 
           {app.nonTechnicalProfile && (
-            <DetailSection title="Non-Technical Professional Details">
+            <DetailSection title="Non Technical Professional Details">
               <dl>
                 <DetailRow label="Job Title" value={app.nonTechnicalProfile.jobTitle} />
                 <DetailRow label="Employer" value={app.nonTechnicalProfile.employer} />

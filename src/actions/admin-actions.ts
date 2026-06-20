@@ -303,7 +303,7 @@ function getCategoryDetails(m: any): string {
     return `Student - ${m.studentProfile.institution}`;
   }
   if (m.nonTechnicalProfile) {
-    return `Non-Technical - ${m.nonTechnicalProfile.jobTitle} at ${m.nonTechnicalProfile.employer}`;
+    return `Non Technical - ${m.nonTechnicalProfile.jobTitle} at ${m.nonTechnicalProfile.employer}`;
   }
   if (m.corporateProfile) {
     return `Corporate - ${m.corporateProfile.companyName}`;
