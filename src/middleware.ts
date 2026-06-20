@@ -6,8 +6,8 @@ export function middleware(request: NextRequest) {
 
   // Allow login page
   if (pathname === "/admin/login") {
-    const sessionCookie = request.cookies.get("next-auth.session-token")?.value ||
-                          request.cookies.get("__Secure-next-auth.session-token")?.value;
+    const sessionCookie = request.cookies.get("authjs.session-token")?.value ||
+                          request.cookies.get("__Secure-authjs.session-token")?.value;
     if (sessionCookie) {
       return NextResponse.redirect(new URL("/admin", origin));
     }
@@ -16,8 +16,8 @@ export function middleware(request: NextRequest) {
 
   // Protect all /admin routes
   if (pathname.startsWith("/admin")) {
-    const sessionCookie = request.cookies.get("next-auth.session-token")?.value ||
-                          request.cookies.get("__Secure-next-auth.session-token")?.value;
+    const sessionCookie = request.cookies.get("authjs.session-token")?.value ||
+                          request.cookies.get("__Secure-authjs.session-token")?.value;
 
     if (!sessionCookie) {
       const loginUrl = new URL("/admin/login", origin);
