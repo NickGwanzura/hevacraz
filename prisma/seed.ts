@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const { PrismaPg } = require("@prisma/adapter-pg");
-const bcrypt = require("bcryptjs");
+import { PrismaClient } from "../src/generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -14,9 +14,8 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("Seeding database...");
 
-  // Create default admin user
   const adminEmail = process.env.ADMIN_EMAIL || "admin@hevacraz.org";
-  const adminPassword = "admin123"; // Change on first login
+  const adminPassword = "admin123";
 
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },
