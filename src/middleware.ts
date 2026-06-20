@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, origin } = request.nextUrl;
 
   // Allow login page
   if (pathname === "/admin/login") {
     const sessionCookie = request.cookies.get("next-auth.session-token")?.value ||
                           request.cookies.get("__Secure-next-auth.session-token")?.value;
     if (sessionCookie) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return NextResponse.redirect(new URL("/admin", origin));
     }
     return NextResponse.next();
   }
@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
                           request.cookies.get("__Secure-next-auth.session-token")?.value;
 
     if (!sessionCookie) {
-      const loginUrl = new URL("/admin/login", request.url);
+      const loginUrl = new URL("/admin/login", origin);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
