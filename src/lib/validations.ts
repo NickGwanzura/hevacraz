@@ -22,7 +22,7 @@ export const step1Schema = z.object({
 
 export const technicianSchema = z.object({
   qualifications: z.string().min(1, "Qualifications/certifications are required"),
-  yearsOfExperience: z.number().min(0, "Must be 0 or more").max(70),
+  yearsOfExperience: z.coerce.number().min(0, "Must be 0 or more").max(70),
   expertiseAreas: z.array(z.nativeEnum(ExpertiseArea)).min(1, "Select at least one area"),
   refrigerantCertifications: z.array(z.nativeEnum(RefrigerantCertification)).optional(),
 });
@@ -44,8 +44,8 @@ export const nonTechnicalSchema = z.object({
 export const corporateSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
   coreBusinessActivity: z.nativeEnum(CoreBusinessActivity),
-  totalEmployees: z.number().min(1, "At least 1 employee required"),
-  activeFieldTechnicians: z.number().min(0, "Must be 0 or more"),
+  totalEmployees: z.coerce.number().min(1, "At least 1 employee required"),
+  activeFieldTechnicians: z.coerce.number().min(0, "Must be 0 or more"),
   regulatoryAffiliations: z.string().optional(),
   representativeName: z.string().min(1, "Representative name is required"),
   representativeEmail: z.string().email("Valid email is required"),

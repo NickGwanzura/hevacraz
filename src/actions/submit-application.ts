@@ -68,7 +68,7 @@ export async function submitApplication(formData: FormData) {
           technicianProfile: {
             create: {
               qualifications: categoryData.qualifications,
-              yearsOfExperience: Number(categoryData.yearsOfExperience),
+              yearsOfExperience: categoryData.yearsOfExperience,
               expertiseAreas: JSON.stringify(categoryData.expertiseAreas),
               refrigerantCertifications: JSON.stringify(categoryData.refrigerantCertifications || []),
             },
@@ -99,8 +99,8 @@ export async function submitApplication(formData: FormData) {
             create: {
               companyName: categoryData.companyName,
               coreBusinessActivity: categoryData.coreBusinessActivity,
-              totalEmployees: Number(categoryData.totalEmployees),
-              activeFieldTechnicians: Number(categoryData.activeFieldTechnicians),
+              totalEmployees: categoryData.totalEmployees,
+              activeFieldTechnicians: categoryData.activeFieldTechnicians,
               regulatoryAffiliations: categoryData.regulatoryAffiliations || "",
               representativeName: categoryData.representativeName,
               representativeEmail: categoryData.representativeEmail,
