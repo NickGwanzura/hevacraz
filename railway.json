@@ -6,7 +6,7 @@
   },
   "deploy": {
     "numReplicas": 1,
-    "startCommand": "npm run railway:init && npm run start",
+    "startCommand": "npx prisma db push && node prisma/seed.js && npm run start",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
