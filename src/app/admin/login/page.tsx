@@ -22,7 +22,8 @@ export default function AdminLoginPage() {
       if (result?.error) {
         setError("Invalid email or password. Please try again.");
       } else {
-        router.push("/admin");
+        // Full page navigation so the session cookie is sent with the request
+        window.location.href = "/admin";
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
