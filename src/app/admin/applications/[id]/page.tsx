@@ -1,321 +1,234 @@
-import { getApplicationById, approveApplication, rejectApplication, markUnderReview, suspendMember, addAdminNote } from "@/actions/admin-actions";
-import { CATEGORY_LABEL, JOINING_REASONS, EXPERTISE_AREAS, REFRIGERANT_CERTIFICATIONS } from "@/lib/constants";
-import { MembershipCategory, ApplicationStatus } from "@/lib/enums";
+import { getApplicationById, addAdminNote } from "@/actions/admin-actions";
+import { CATEGORY_LABEL } from "@/lib/constants";
+import { MembershipCategory } from "@/lib/enums";
 import { notFound } from "next/navigation";
 import { AdminActions } from "./admin-actions";
 import Link from "next/link";
 
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    UNDER_REVIEW: "bg-blue-100 text-blue-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-    SUSPENDED: "bg-gray-100 text-gray-800",
+  const map: Record<string, { cls: string; label: string }> = {
+    PENDING: { cls: "badge-pending", label: "Pending" },
+    UNDER_REVIEW: { cls: "badge-review", label: "Under Review" },
+    APPROVED: { cls: "badge-approved", label: "Approved" },
+    REJECTED: { cls: "badge-rejected", label: "Rejected" },
+    SUSPENDED: { cls: "badge-suspended", label: "Suspended" },
   };
-  const labels: Record<string, string> = {
-    PENDING: "Pending",
-    UNDER_REVIEW: "Under Review",
-    APPROVED: "Approved",
-    REJECTED: "Rejected",
-    SUSPENDED: "Suspended",
-  };
+  const s = map[status] || { cls: "badge", label: status };
+  return <span className={`${s.cls} text-sm px-3 py-1`}>{s.label}</span>;
+}
+
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${colors[status] || "bg-gray-100"}`}>
-      {labels[status] || status}
-    </span>
+    <div className="card overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+        <h2 className="section-title">{title}</h2>
+      </div>
+      <div className="p-6">{children}</div>
+    </div>
   );
 }
 
-export default async function ApplicationDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="sm:grid sm:grid-cols-3 sm:gap-4 py-3 border-b border-gray-50 last:border-0">
+      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 sm:mb-0">{label}</dt>
+      <dd className="text-sm text-gray-900 sm:col-span-2">{value}</dd>
+    </div>
+  );
+}
+
+function Tag({ children, className = "bg-teal-50 text-teal-700" }: { children: React.ReactNode; className?: string }) {
+  return <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${className}`}>{children}</span>;
+}
+
+function TimelineItem({ active, label, date, color }: { active: boolean; label: string; date?: string; color: string }) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="flex flex-col items-center">
+        <div className={`w-3 h-3 rounded-full ring-4 ring-white ${color} ${active ? "" : "opacity-40"}`} />
+      </div>
+      <div className={active ? "" : "opacity-40"}>
+        <p className="text-sm font-medium text-gray-900">{label}</p>
+        {date && <p className="text-xs text-gray-500 mt-0.5">{date}</p>}
+      </div>
+    </div>
+  );
+}
+
+export default async function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const app = await getApplicationById(id);
 
-  if (!app) {
-    notFound();
-  }
+  if (!app) notFound();
 
   const cat = app.category as MembershipCategory;
   const joiningReasons: string[] = JSON.parse(app.joiningReasons || "[]");
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/admin/applications" className="text-gray-400 hover:text-gray-600">
+    <div className="space-y-6 animate-fade-in">
+      {/* Back + Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <Link href="/admin/applications" className="btn-ghost btn-sm mt-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-[#0f3b5e]">
-              {app.firstName} {app.lastName}
-            </h1>
-            <p className="text-gray-500 text-sm">
-              {CATEGORY_LABEL[cat]} • {app.membershipNumber ? `#${app.membershipNumber}` : "No membership number"}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold text-[#0f3b5e]">{app.firstName} {app.lastName}</h1>
+              <StatusBadge status={app.status} />
+            </div>
+            <p className="text-gray-500 text-sm mt-1">
+              {CATEGORY_LABEL[cat]}
+              {app.membershipNumber && <span className="ml-2 font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{app.membershipNumber}</span>}
             </p>
           </div>
         </div>
-        <StatusBadge status={app.status} />
       </div>
 
-      {/* Admin Actions */}
+      {/* Admin Action Buttons */}
       <AdminActions application={JSON.parse(JSON.stringify(app))} />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left: Main details */}
+        {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Personal Info */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-semibold text-[#0f3b5e] mb-4">Personal & Contact Information</h2>
-            <dl className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Full Name</dt>
-                <dd className="text-sm mt-0.5">{app.firstName} {app.lastName}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Email</dt>
-                <dd className="text-sm mt-0.5">{app.email}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Phone</dt>
-                <dd className="text-sm mt-0.5">{app.phone}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Address</dt>
-                <dd className="text-sm mt-0.5">{app.address}</dd>
-              </div>
+          {/* Personal & Contact */}
+          <DetailSection title="Personal & Contact Information">
+            <dl>
+              <DetailRow label="Full Name" value={`${app.firstName} ${app.lastName}`} />
+              <DetailRow label="Email" value={<a href={`mailto:${app.email}`} className="text-teal-600 hover:text-teal-800">{app.email}</a>} />
+              <DetailRow label="Phone" value={<a href={`tel:${app.phone}`} className="text-teal-600 hover:text-teal-800">{app.phone}</a>} />
+              <DetailRow label="Address" value={app.address} />
             </dl>
-          </div>
+          </DetailSection>
 
-          {/* Category-Specific Info */}
+          {/* Category-specific section */}
           {app.technicianProfile && (
-            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <h2 className="font-semibold text-[#0f3b5e] mb-4">Technician Details</h2>
-              <dl className="space-y-4">
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Qualifications</dt>
-                  <dd className="text-sm mt-0.5">{app.technicianProfile.qualifications}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Years of Experience</dt>
-                  <dd className="text-sm mt-0.5">{app.technicianProfile.yearsOfExperience}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Expertise Areas</dt>
-                  <dd className="text-sm mt-0.5">
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {JSON.parse(app.technicianProfile.expertiseAreas || "[]").map((area: string) => (
-                        <span key={area} className="px-2 py-1 bg-teal-50 text-teal-700 rounded text-xs">
-                          {area.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                        </span>
-                      ))}
-                    </div>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Refrigerant Certifications</dt>
-                  <dd className="text-sm mt-0.5">
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {JSON.parse(app.technicianProfile.refrigerantCertifications || "[]").map((cert: string) => (
-                        <span key={cert} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
-                          {cert.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                        </span>
-                      ))}
-                      {JSON.parse(app.technicianProfile.refrigerantCertifications || "[]").length === 0 && (
-                        <span className="text-gray-400">None listed</span>
-                      )}
-                    </div>
-                  </dd>
-                </div>
+            <DetailSection title="Technician Details">
+              <dl>
+                <DetailRow label="Qualifications" value={app.technicianProfile.qualifications} />
+                <DetailRow label="Years of Experience" value={`${app.technicianProfile.yearsOfExperience} years`} />
+                <DetailRow label="Expertise Areas" value={
+                  <div className="flex flex-wrap gap-1.5">
+                    {JSON.parse(app.technicianProfile.expertiseAreas || "[]").map((a: string) => (
+                      <Tag key={a}>{a.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}</Tag>
+                    ))}
+                  </div>
+                } />
+                <DetailRow label="Refrigerant Certs" value={
+                  <div className="flex flex-wrap gap-1.5">
+                    {JSON.parse(app.technicianProfile.refrigerantCertifications || "[]").length > 0
+                      ? JSON.parse(app.technicianProfile.refrigerantCertifications || "[]").map((c: string) => (
+                          <Tag key={c} className="bg-blue-50 text-blue-700">{c.replace(/_/g, " ").replace(/\b\w/g, (s: string) => s.toUpperCase())}</Tag>
+                        ))
+                      : <span className="text-gray-400 text-sm">None listed</span>
+                    }
+                  </div>
+                } />
               </dl>
-            </div>
+            </DetailSection>
           )}
 
           {app.studentProfile && (
-            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <h2 className="font-semibold text-[#0f3b5e] mb-4">Student Details</h2>
-              <dl className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Institution</dt>
-                  <dd className="text-sm mt-0.5">{app.studentProfile.institution}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Programme</dt>
-                  <dd className="text-sm mt-0.5">{app.studentProfile.programme}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Expected Graduation</dt>
-                  <dd className="text-sm mt-0.5">{app.studentProfile.expectedGraduation.toLocaleDateString()}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Career Interest</dt>
-                  <dd className="text-sm mt-0.5 capitalize">{app.studentProfile.careerInterest.replace(/_/g, " ").toLowerCase()}</dd>
-                </div>
+            <DetailSection title="Student Details">
+              <dl>
+                <DetailRow label="Institution" value={app.studentProfile.institution} />
+                <DetailRow label="Programme" value={app.studentProfile.programme} />
+                <DetailRow label="Expected Graduation" value={app.studentProfile.expectedGraduation.toLocaleDateString()} />
+                <DetailRow label="Career Interest" value={app.studentProfile.careerInterest.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())} />
               </dl>
-            </div>
+            </DetailSection>
           )}
 
           {app.nonTechnicalProfile && (
-            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <h2 className="font-semibold text-[#0f3b5e] mb-4">Non-Technical Professional Details</h2>
-              <dl className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Job Title</dt>
-                  <dd className="text-sm mt-0.5">{app.nonTechnicalProfile.jobTitle}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Employer</dt>
-                  <dd className="text-sm mt-0.5">{app.nonTechnicalProfile.employer}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Sector Focus</dt>
-                  <dd className="text-sm mt-0.5 capitalize">{app.nonTechnicalProfile.sectorFocus.replace(/_/g, " ").toLowerCase()}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Primary Goal</dt>
-                  <dd className="text-sm mt-0.5">{app.nonTechnicalProfile.joiningGoal}</dd>
-                </div>
+            <DetailSection title="Non-Technical Professional Details">
+              <dl>
+                <DetailRow label="Job Title" value={app.nonTechnicalProfile.jobTitle} />
+                <DetailRow label="Employer" value={app.nonTechnicalProfile.employer} />
+                <DetailRow label="Sector Focus" value={app.nonTechnicalProfile.sectorFocus.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())} />
+                <DetailRow label="Primary Goal" value={app.nonTechnicalProfile.joiningGoal} />
               </dl>
-            </div>
+            </DetailSection>
           )}
 
           {app.corporateProfile && (
-            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <h2 className="font-semibold text-[#0f3b5e] mb-4">Corporate/Company Details</h2>
-              <dl className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Company Name</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.companyName}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Core Business</dt>
-                  <dd className="text-sm mt-0.5 capitalize">{app.corporateProfile.coreBusinessActivity.replace(/_/g, " ").toLowerCase()}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Total Employees</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.totalEmployees}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Active Field Technicians</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.activeFieldTechnicians}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Regulatory Affiliations</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.regulatoryAffiliations || "None"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Representative Name</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.representativeName}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-medium text-gray-500 uppercase">Representative Email</dt>
-                  <dd className="text-sm mt-0.5">{app.corporateProfile.representativeEmail}</dd>
-                </div>
+            <DetailSection title="Corporate / Company Details">
+              <dl>
+                <DetailRow label="Company Name" value={app.corporateProfile.companyName} />
+                <DetailRow label="Core Business" value={app.corporateProfile.coreBusinessActivity.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())} />
+                <DetailRow label="Total Employees" value={app.corporateProfile.totalEmployees} />
+                <DetailRow label="Active Field Technicians" value={app.corporateProfile.activeFieldTechnicians} />
+                <DetailRow label="Regulatory Affiliations" value={app.corporateProfile.regulatoryAffiliations || <span className="text-gray-400">None</span>} />
+                <DetailRow label="Representative" value={`${app.corporateProfile.representativeName} (${app.corporateProfile.representativeEmail})`} />
               </dl>
-            </div>
+            </DetailSection>
           )}
 
           {/* Professional Alignment */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-semibold text-[#0f3b5e] mb-4">Professional Alignment & Declaration</h2>
-            <dl className="space-y-3">
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Reasons for Joining</dt>
-                <dd className="mt-1">
-                  <div className="flex flex-wrap gap-2">
-                    {joiningReasons.map((reason: string) => (
-                      <span key={reason} className="px-2 py-1 bg-teal-50 text-teal-700 rounded text-xs">
-                        {reason.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                      </span>
-                    ))}
-                  </div>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Declaration Accepted</dt>
-                <dd className="text-sm mt-0.5">{app.declaration ? "Yes" : "No"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium text-gray-500 uppercase">Signature</dt>
-                <dd className="text-sm mt-0.5">{app.signatureName}</dd>
-              </div>
+          <DetailSection title="Professional Alignment & Declaration">
+            <dl>
+              <DetailRow label="Reasons for Joining" value={
+                <div className="flex flex-wrap gap-1.5">
+                  {joiningReasons.map((r: string) => (
+                    <Tag key={r}>{r.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}</Tag>
+                  ))}
+                </div>
+              } />
+              <DetailRow label="Declaration" value={app.declaration ? <Tag className="bg-green-50 text-green-700">Accepted</Tag> : <Tag className="bg-red-50 text-red-700">Not Accepted</Tag>} />
+              <DetailRow label="Signature" value={app.signatureName} />
             </dl>
-          </div>
+          </DetailSection>
 
           {/* Timeline */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-semibold text-[#0f3b5e] mb-4">Timeline</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                <div>
-                  <p className="text-sm font-medium">Application Submitted</p>
-                  <p className="text-xs text-gray-500">{app.applicationDate.toLocaleDateString()} at {app.applicationDate.toLocaleTimeString()}</p>
-                </div>
-              </div>
-              {app.approvalDate && (
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <div>
-                    <p className="text-sm font-medium">Approved</p>
-                    <p className="text-xs text-gray-500">{app.approvalDate.toLocaleDateString()} at {app.approvalDate.toLocaleTimeString()}</p>
-                  </div>
-                </div>
-              )}
-              {app.rejectionDate && (
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  <div>
-                    <p className="text-sm font-medium">Rejected</p>
-                    <p className="text-xs text-gray-500">{app.rejectionDate.toLocaleDateString()} at {app.rejectionDate.toLocaleTimeString()}</p>
-                  </div>
+          <DetailSection title="Timeline">
+            <div className="space-y-6">
+              <TimelineItem active label="Application Submitted" date={`${app.applicationDate.toLocaleDateString()} at ${app.applicationDate.toLocaleTimeString()}`} color="bg-teal-500" />
+              {app.approvalDate && <TimelineItem active label="Approved" date={`${app.approvalDate.toLocaleDateString()} at ${app.approvalDate.toLocaleTimeString()}`} color="bg-green-500" />}
+              {app.rejectionDate && <TimelineItem active label="Rejected" date={`${app.rejectionDate.toLocaleDateString()} at ${app.rejectionDate.toLocaleTimeString()}`} color="bg-red-500" />}
+              {!app.approvalDate && !app.rejectionDate && (
+                <div className="flex items-center gap-2 text-sm text-gray-400 ml-[22px]">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Awaiting review decision
                 </div>
               )}
             </div>
-          </div>
+          </DetailSection>
         </div>
 
-        {/* Right: Admin Notes */}
+        {/* Sidebar: Admin Notes */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-semibold text-[#0f3b5e] mb-4">Admin Notes</h2>
-            <form action={async (formData: FormData) => {
-              "use server";
-              const content = formData.get("content") as string;
-              if (content?.trim()) {
-                await addAdminNote(id, content);
-              }
-            }}>
-              <textarea
-                name="content"
-                rows={3}
-                placeholder="Add a note..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent mb-2"
-              />
-              <button
-                type="submit"
-                className="w-full px-3 py-2 bg-[#0f3b5e] text-white rounded-lg hover:bg-[#1a5a8a] transition-colors text-sm"
-              >
-                Add Note
-              </button>
-            </form>
-            <div className="mt-4 space-y-3">
-              {app.adminNotes.map((note) => (
-                <div key={note.id} className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-700">{note.content}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {note.admin.name || note.admin.email} • {note.createdAt.toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-              {app.adminNotes.length === 0 && (
-                <p className="text-sm text-gray-400">No notes yet</p>
-              )}
+          <div className="card overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+              <h2 className="section-title">Admin Notes</h2>
+            </div>
+            <div className="p-6">
+              <form action={async (formData: FormData) => {
+                "use server";
+                const content = formData.get("content") as string;
+                if (content?.trim()) await addAdminNote(id, content);
+              }}>
+                <textarea name="content" rows={3} placeholder="Add a note..." className="input mb-3" />
+                <button type="submit" className="btn-primary btn-md w-full">Add Note</button>
+              </form>
+              <div className="mt-5 space-y-3">
+                {app.adminNotes.map((note) => (
+                  <div key={note.id} className="p-3 bg-gray-50 rounded-xl">
+                    <p className="text-sm text-gray-700 leading-relaxed">{note.content}</p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {note.admin.name || note.admin.email}
+                      <span className="mx-1">&middot;</span>
+                      {note.createdAt.toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+                {app.adminNotes.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-6">No notes yet</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

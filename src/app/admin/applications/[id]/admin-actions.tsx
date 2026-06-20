@@ -17,7 +17,6 @@ export function AdminActions({ application }: { application: Application }) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
-
   const status = application.status;
 
   const doAction = async (action: string, fn: () => Promise<any>) => {
@@ -33,55 +32,53 @@ export function AdminActions({ application }: { application: Application }) {
     }
   };
 
+  const Btn = ({ action, label, color, loading: l }: { action: string; label: string; color: string; loading: string }) => (
+    <button onClick={() => doAction(action, l === "approve" ? () => approveApplication(application.id) : l === "reject" ? () => rejectApplication(application.id) : l === "suspend" ? () => suspendMember(application.id) : () => markUnderReview(application.id))}
+      disabled={loading !== null}
+      className={`inline-flex items-center gap-1.5 px-4 py-2 ${color} text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed`}>
+      {loading === action ? (
+        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {action === "review" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />}
+          {action === "approve" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />}
+          {action === "reject" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />}
+          {action === "suspend" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />}
+        </svg>
+      )}
+      {loading === action ? "Processing..." : label}
+    </button>
+  );
+
   return (
-    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+    <div className="card p-4">
       <div className="flex flex-wrap items-center gap-2">
         {status === ApplicationStatus.PENDING && (
-          <button
-            onClick={() => doAction("review", () => markUnderReview(application.id))}
-            disabled={loading !== null}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm disabled:opacity-50"
-          >
-            {loading === "review" ? "..." : "Mark Under Review"}
-          </button>
+          <Btn action="review" label="Mark Under Review" color="bg-blue-600" loading="review" />
         )}
         {(status === ApplicationStatus.PENDING || status === ApplicationStatus.UNDER_REVIEW) && (
           <>
-            <button
-              onClick={() => doAction("approve", () => approveApplication(application.id))}
-              disabled={loading !== null}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
-            >
-              {loading === "approve" ? "..." : "Approve"}
-            </button>
-            <button
-              onClick={() => doAction("reject", () => rejectApplication(application.id))}
-              disabled={loading !== null}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm disabled:opacity-50"
-            >
-              {loading === "reject" ? "..." : "Reject"}
-            </button>
+            <Btn action="approve" label="Approve" color="bg-green-600" loading="approve" />
+            <Btn action="reject" label="Reject" color="bg-red-600" loading="reject" />
           </>
         )}
         {status === ApplicationStatus.APPROVED && (
-          <button
-            onClick={() => doAction("suspend", () => suspendMember(application.id))}
-            disabled={loading !== null}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm disabled:opacity-50"
-          >
-            {loading === "suspend" ? "..." : "Suspend Member"}
-          </button>
+          <Btn action="suspend" label="Suspend Member" color="bg-gray-600" loading="suspend" />
         )}
         {status === ApplicationStatus.SUSPENDED && (
-          <button
-            onClick={() => doAction("review", () => markUnderReview(application.id))}
-            disabled={loading !== null}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm disabled:opacity-50"
-          >
-            {loading === "review" ? "..." : "Reactivate (Under Review)"}
-          </button>
+          <Btn action="review" label="Reactivate (Under Review)" color="bg-blue-600" loading="review" />
         )}
-        {error && <span className="text-red-600 text-sm ml-2">{error}</span>}
+        {error && (
+          <div className="flex items-center gap-1.5 text-red-600 text-sm ml-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

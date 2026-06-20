@@ -2,28 +2,17 @@ import { getApplications } from "@/actions/admin-actions";
 import { CATEGORY_LABEL } from "@/lib/constants";
 import { MembershipCategory } from "@/lib/enums";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    UNDER_REVIEW: "bg-blue-100 text-blue-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-    SUSPENDED: "bg-gray-100 text-gray-800",
+  const map: Record<string, { cls: string; label: string }> = {
+    PENDING: { cls: "badge-pending", label: "Pending" },
+    UNDER_REVIEW: { cls: "badge-review", label: "Under Review" },
+    APPROVED: { cls: "badge-approved", label: "Approved" },
+    REJECTED: { cls: "badge-rejected", label: "Rejected" },
+    SUSPENDED: { cls: "badge-suspended", label: "Suspended" },
   };
-  const labels: Record<string, string> = {
-    PENDING: "Pending",
-    UNDER_REVIEW: "Under Review",
-    APPROVED: "Approved",
-    REJECTED: "Rejected",
-    SUSPENDED: "Suspended",
-  };
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || "bg-gray-100"}`}>
-      {labels[status] || status}
-    </span>
-  );
+  const s = map[status] || { cls: "badge", label: status };
+  return <span className={s.cls}>{s.label}</span>;
 }
 
 export default async function ApplicationsPage({
@@ -42,61 +31,44 @@ export default async function ApplicationsPage({
   const buildUrl = (overrides: Record<string, string>) => {
     const sp = new URLSearchParams();
     const merged = { search, category, status, page: page.toString(), ...overrides };
-    Object.entries(merged).forEach(([k, v]) => {
-      if (v && v !== "ALL" && v !== "1") sp.set(k, v);
-    });
+    Object.entries(merged).forEach(([k, v]) => { if (v && v !== "ALL" && v !== "1") sp.set(k, v); });
     return `/admin/applications?${sp.toString()}`;
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#0f3b5e]">Applications</h1>
-          <p className="text-gray-500 text-sm">View and manage membership applications</p>
+          <h1 className="page-title">Applications</h1>
+          <p className="text-gray-500 text-sm mt-1">View and manage membership applications</p>
         </div>
-        <Link
-          href="/apply"
-          target="_blank"
-          className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm"
-        >
+        <Link href="/apply" target="_blank" className="btn-accent btn-md self-start">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
           Public Form
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-        <form className="flex flex-wrap gap-3 items-end">
+      <div className="card p-5">
+        <form className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Search</label>
-            <input
-              type="text"
-              name="search"
-              defaultValue={search}
-              placeholder="Name, email, membership #..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            />
+            <label className="label">Search</label>
+            <input type="text" name="search" defaultValue={search}
+              placeholder="Name, email, membership #..." className="input" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
-            <select
-              name="category"
-              defaultValue={category}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
-            >
+            <label className="label">Category</label>
+            <select name="category" defaultValue={category} className="input bg-white">
               <option value="ALL">All Categories</option>
-              {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
+              {Object.entries(CATEGORY_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
-            <select
-              name="status"
-              defaultValue={status}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
-            >
+            <label className="label">Status</label>
+            <select name="status" defaultValue={status} className="input bg-white">
               <option value="ALL">All Statuses</option>
               <option value="PENDING">Pending</option>
               <option value="UNDER_REVIEW">Under Review</option>
@@ -105,53 +77,41 @@ export default async function ApplicationsPage({
               <option value="SUSPENDED">Suspended</option>
             </select>
           </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-[#0f3b5e] text-white rounded-lg hover:bg-[#1a5a8a] transition-colors text-sm"
-          >
-            Filter
-          </button>
+          <button type="submit" className="btn-primary btn-md">Filter</button>
         </form>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-wrap">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Name</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Email</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Category</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Status</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Date</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Action</th>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {result.applications.map((app) => (
-                <tr key={app.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 font-medium">{app.firstName} {app.lastName}</td>
-                  <td className="px-6 py-3 text-gray-500">{app.email}</td>
-                  <td className="px-6 py-3">{CATEGORY_LABEL[app.category as MembershipCategory]}</td>
-                  <td className="px-6 py-3"><StatusBadge status={app.status} /></td>
-                  <td className="px-6 py-3 text-gray-500">{app.applicationDate.toLocaleDateString()}</td>
-                  <td className="px-6 py-3">
-                    <Link
-                      href={`/admin/applications/${app.id}`}
-                      className="text-teal-600 hover:text-teal-800 font-medium"
-                    >
+                <tr key={app.id}>
+                  <td className="font-medium">{app.firstName} {app.lastName}</td>
+                  <td className="text-gray-500">{app.email}</td>
+                  <td className="text-gray-500">{CATEGORY_LABEL[app.category as MembershipCategory]}</td>
+                  <td><StatusBadge status={app.status} /></td>
+                  <td className="text-gray-500 text-sm">{app.applicationDate.toLocaleDateString()}</td>
+                  <td>
+                    <Link href={`/admin/applications/${app.id}`} className="btn-ghost btn-sm">
                       View
                     </Link>
                   </td>
                 </tr>
               ))}
               {result.applications.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
-                    No applications found
-                  </td>
-                </tr>
+                <tr><td colSpan={6} className="text-center text-gray-400 py-12">No applications found</td></tr>
               )}
             </tbody>
           </table>
@@ -161,22 +121,17 @@ export default async function ApplicationsPage({
         {result.totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <p className="text-sm text-gray-500">
-              Page {result.page} of {result.totalPages} ({result.total} total)
+              Page {result.page} of {result.totalPages}
+              <span className="text-gray-400 ml-1">({result.total} total)</span>
             </p>
             <div className="flex gap-2">
               {result.page > 1 && (
-                <Link
-                  href={buildUrl({ page: (result.page - 1).toString() })}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
-                >
+                <Link href={buildUrl({ page: (result.page - 1).toString() })} className="btn-outline btn-sm">
                   Previous
                 </Link>
               )}
               {result.page < result.totalPages && (
-                <Link
-                  href={buildUrl({ page: (result.page + 1).toString() })}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
-                >
+                <Link href={buildUrl({ page: (result.page + 1).toString() })} className="btn-outline btn-sm">
                   Next
                 </Link>
               )}

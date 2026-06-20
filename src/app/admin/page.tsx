@@ -4,197 +4,205 @@ import { MembershipCategory, ApplicationStatus } from "@/lib/enums";
 import Link from "next/link";
 
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    UNDER_REVIEW: "bg-blue-100 text-blue-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-    SUSPENDED: "bg-gray-100 text-gray-800",
+  const map: Record<string, { cls: string; label: string }> = {
+    PENDING: { cls: "badge-pending", label: "Pending" },
+    UNDER_REVIEW: { cls: "badge-review", label: "Under Review" },
+    APPROVED: { cls: "badge-approved", label: "Approved" },
+    REJECTED: { cls: "badge-rejected", label: "Rejected" },
+    SUSPENDED: { cls: "badge-suspended", label: "Suspended" },
   };
-  const labels: Record<string, string> = {
-    PENDING: "Pending",
-    UNDER_REVIEW: "Under Review",
-    APPROVED: "Approved",
-    REJECTED: "Rejected",
-    SUSPENDED: "Suspended",
-  };
+  const s = map[status] || { cls: "badge", label: status };
+  return <span className={s.cls}>{s.label}</span>;
+}
+
+function StatCard({ label, value, color, icon }: { label: string; value: number; color: string; icon: string }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || "bg-gray-100"}`}>
-      {labels[status] || status}
-    </span>
+    <div className="card p-5 hover:shadow-md transition-all duration-200">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
+          <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
+        </div>
+        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressItem({ label, count, max, color = "bg-teal-500" }: { label: string; count: number; max: number; color?: string }) {
+  const pct = max > 0 ? Math.round((count / max) * 100) : 0;
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm text-gray-600 truncate">{label}</span>
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="w-24 sm:w-36 bg-gray-100 rounded-full h-2 overflow-hidden">
+          <div className={`${color} h-2 rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+        </div>
+        <span className="text-sm font-semibold text-gray-700 w-8 text-right tabular-nums">{count}</span>
+      </div>
+    </div>
   );
 }
 
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
 
+  const statCards = [
+    { label: "Total Members", value: stats.totalMembers, color: "text-[#0f3b5e]", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+    { label: "Pending", value: stats.pendingApplications, color: "text-yellow-600", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { label: "Approved", value: stats.approvedMembers, color: "text-green-600", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { label: "Rejected", value: stats.rejectedApplications, color: "text-red-600", icon: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" },
+    { label: "Corporate", value: stats.corporateMembers, color: "text-teal-600", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
+  ];
+
+  const maxCount = Math.max(1, ...stats.membersByCategory.map((c) => c._count));
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#0f3b5e]">Dashboard</h1>
-        <p className="text-gray-500 text-sm">Welcome to the HEVACRAZ membership management dashboard.</p>
+        <h1 className="page-title">Dashboard</h1>
+        <p className="text-gray-500 text-sm mt-1">Overview of the HEVACRAZ membership registry</p>
       </div>
 
-      {/* Stats cards */}
+      {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">Total Members</p>
-          <p className="text-3xl font-bold text-[#0f3b5e]">{stats.totalMembers}</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">Pending</p>
-          <p className="text-3xl font-bold text-yellow-600">{stats.pendingApplications}</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">Approved</p>
-          <p className="text-3xl font-bold text-green-600">{stats.approvedMembers}</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">Rejected</p>
-          <p className="text-3xl font-bold text-red-600">{stats.rejectedApplications}</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">Corporate</p>
-          <p className="text-3xl font-bold text-teal-600">{stats.corporateMembers}</p>
-        </div>
+        {statCards.map((card) => <StatCard key={card.label} {...card} />)}
       </div>
 
+      {/* Charts grid */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Members by Category */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="font-semibold text-[#0f3b5e] mb-4">Members by Category</h2>
+        <div className="card p-6">
+          <h2 className="section-title mb-5">Members by Category</h2>
           {stats.membersByCategory.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {stats.membersByCategory.map((cat) => (
-                <div key={cat.category} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">{CATEGORY_LABEL[cat.category as MembershipCategory]}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 sm:w-48 bg-gray-100 rounded-full h-2">
-                      <div
-                        className="bg-teal-500 h-2 rounded-full"
-                        style={{
-                          width: `${Math.min(100, (cat._count / Math.max(...stats.membersByCategory.map((c) => c._count))) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 w-8 text-right">{cat._count}</span>
-                  </div>
-                </div>
+                <ProgressItem key={cat.category}
+                  label={CATEGORY_LABEL[cat.category as MembershipCategory]}
+                  count={cat._count} max={maxCount}
+                  color="bg-teal-500" />
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">No approved members yet</p>
+            <EmptyState message="No approved members yet" />
           )}
         </div>
 
-        {/* Expertise Distribution */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="font-semibold text-[#0f3b5e] mb-4">Technician Expertise Areas</h2>
+        <div className="card p-6">
+          <h2 className="section-title mb-5">Technician Expertise Areas</h2>
           {Object.keys(stats.expertiseCount).length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Object.entries(stats.expertiseCount)
                 .sort(([, a], [, b]) => b - a)
                 .map(([area, count]) => (
-                  <div key={area} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 capitalize">
-                      {area.replace(/_/g, " ").toLowerCase()}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">{count}</span>
-                  </div>
+                  <ProgressItem key={area}
+                    label={area.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                    count={count}
+                    max={Math.max(1, ...Object.values(stats.expertiseCount))}
+                    color="bg-blue-500" />
                 ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">No technician data yet</p>
+            <EmptyState message="No technician data yet" />
           )}
         </div>
 
-        {/* Refrigerant Certifications */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="font-semibold text-[#0f3b5e] mb-4">Refrigerant Certifications</h2>
+        <div className="card p-6">
+          <h2 className="section-title mb-5">Refrigerant Certifications</h2>
           {Object.keys(stats.refrigerantCount).length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Object.entries(stats.refrigerantCount)
                 .sort(([, a], [, b]) => b - a)
                 .map(([cert, count]) => (
-                  <div key={cert} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 capitalize">
-                      {cert.replace(/_/g, " ").toLowerCase()}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">{count}</span>
-                  </div>
+                  <ProgressItem key={cert}
+                    label={cert.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                    count={count}
+                    max={Math.max(1, ...Object.values(stats.refrigerantCount))}
+                    color="bg-purple-500" />
                 ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">No certification data yet</p>
+            <EmptyState message="No certification data yet" />
           )}
         </div>
 
-        {/* Student Institutions */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="font-semibold text-[#0f3b5e] mb-4">Students by Institution</h2>
+        <div className="card p-6">
+          <h2 className="section-title mb-5">Students by Institution</h2>
           {Object.keys(stats.institutionCount).length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Object.entries(stats.institutionCount)
                 .sort(([, a], [, b]) => b - a)
                 .map(([inst, count]) => (
-                  <div key={inst} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">{inst}</span>
-                    <span className="text-sm font-medium text-gray-700">{count}</span>
-                  </div>
+                  <ProgressItem key={inst}
+                    label={inst}
+                    count={count}
+                    max={Math.max(1, ...Object.values(stats.institutionCount))}
+                    color="bg-amber-500" />
                 ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">No student data yet</p>
+            <EmptyState message="No student data yet" />
           )}
         </div>
       </div>
 
       {/* Recent Applications */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-[#0f3b5e]">Recent Applications</h2>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="section-title">Recent Applications</h2>
+          <Link href="/admin/applications" className="btn-ghost btn-sm">
+            View All
+          </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="table-wrap">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Name</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Category</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Status</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Date</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Membership #</th>
-                <th className="text-left px-6 py-3 font-medium text-gray-500">Action</th>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Membership #</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {stats.recentApplications.map((app) => (
-                <tr key={app.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-3">{app.firstName} {app.lastName}</td>
-                  <td className="px-6 py-3">{CATEGORY_LABEL[app.category as MembershipCategory]}</td>
-                  <td className="px-6 py-3"><StatusBadge status={app.status} /></td>
-                  <td className="px-6 py-3">{app.applicationDate.toLocaleDateString()}</td>
-                  <td className="px-6 py-3 text-gray-500">{app.membershipNumber || "—"}</td>
-                  <td className="px-6 py-3">
-                    <Link
-                      href={`/admin/applications/${app.id}`}
-                      className="text-teal-600 hover:text-teal-800 font-medium"
-                    >
+                <tr key={app.id}>
+                  <td className="font-medium">{app.firstName} {app.lastName}</td>
+                  <td className="text-gray-500">{CATEGORY_LABEL[app.category as MembershipCategory]}</td>
+                  <td><StatusBadge status={app.status} /></td>
+                  <td className="text-gray-500">{app.applicationDate.toLocaleDateString()}</td>
+                  <td className="text-gray-400 font-mono text-xs">{app.membershipNumber || "—"}</td>
+                  <td>
+                    <Link href={`/admin/applications/${app.id}`} className="btn-ghost btn-sm">
                       View
                     </Link>
                   </td>
                 </tr>
               ))}
               {stats.recentApplications.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
-                    No applications yet
-                  </td>
-                </tr>
+                <tr><td colSpan={6} className="text-center text-gray-400 py-8">No applications yet</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+      <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+      <p className="text-sm">{message}</p>
     </div>
   );
 }
