@@ -28,15 +28,15 @@ const initialFormData: FormData = {
   date: new Date().toISOString().split("T")[0],
 };
 
-function InputField({ label, type = "text", value, onChange, required = true, placeholder = "", error }: {
+function InputField({ label, type = "text", value, onChange, required = true, placeholder = "", error, min }: {
   label: string; type?: string; value: string; onChange: (v: string) => void;
-  required?: boolean; placeholder?: string; error?: string;
+  required?: boolean; placeholder?: string; error?: string; min?: string;
 }) {
   return (
     <div>
       <label className="label">{label} {required && <span className="text-red-400">*</span>}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required}
-        placeholder={placeholder}
+        placeholder={placeholder} min={min}
         className={`input ${error ? "input-error" : ""}`} />
       {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
     </div>
@@ -285,7 +285,7 @@ export default function ApplyPage() {
                 <InputField label="Last Name" value={formData.lastName} onChange={(v) => update("lastName", v)} error={errors.lastName} />
               </div>
               <InputField label="Email Address" type="email" value={formData.email} onChange={(v) => update("email", v)} error={errors.email} />
-              <InputField label="Phone Number" value={formData.phone} onChange={(v) => update("phone", v)} placeholder="+260 XXX XXX XXX" error={errors.phone} />
+              <InputField label="Phone Number" value={formData.phone} onChange={(v) => update("phone", v)} placeholder="+263 XXX XXX XXX" error={errors.phone} />
               <div>
                 <label className="label">Physical / Postal Address <span className="text-red-400">*</span></label>
                 <textarea value={formData.address} onChange={(e) => update("address", e.target.value)} required rows={3}
@@ -301,8 +301,7 @@ export default function ApplyPage() {
           {step === 2 && cat === MembershipCategory.TECHNICIAN && (
             <div className="space-y-5 animate-slide-up">
               <InputField label="Trade Qualifications / Certifications" value={formData.qualifications} onChange={(v) => update("qualifications", v)} error={errors.qualifications} />
-              <InputField label="Years of Active Experience" type="number" value={formData.yearsOfExperience} onChange={(v) => update("yearsOfExperience", v)} error={errors.yearsOfExperience} />
-              <CheckboxGroup label="Primary Areas of Expertise" options={EXPERTISE_AREAS} selected={formData.expertiseAreas} onChange={(v) => update("expertiseAreas", v)} />
+              <InputField label="Years of Active Experience" type="number" min="0" value={formData.yearsOfExperience} onChange={(v) => update("yearsOfExperience", v)} error={errors.yearsOfExperience} />              <CheckboxGroup label="Primary Areas of Expertise" options={EXPERTISE_AREAS} selected={formData.expertiseAreas} onChange={(v) => update("expertiseAreas", v)} />
               {errors.expertiseAreas && <p className="text-red-500 text-xs -mt-3">{errors.expertiseAreas}</p>}
               <CheckboxGroup label="Refrigerant Handling Certifications" options={REFRIGERANT_CERTIFICATIONS} selected={formData.refrigerantCertifications} onChange={(v) => update("refrigerantCertifications", v)} />
             </div>
@@ -337,8 +336,8 @@ export default function ApplyPage() {
               <RadioGroup label="Core Business Activity" options={CORE_BUSINESS_ACTIVITIES} value={formData.coreBusinessActivity} onChange={(v) => update("coreBusinessActivity", v)} />
               {errors.coreBusinessActivity && <p className="text-red-500 text-xs -mt-3">{errors.coreBusinessActivity}</p>}
               <div className="grid sm:grid-cols-2 gap-4">
-                <InputField label="Total Employees" type="number" value={formData.totalEmployees} onChange={(v) => update("totalEmployees", v)} error={errors.totalEmployees} />
-                <InputField label="Active Field Technicians" type="number" value={formData.activeFieldTechnicians} onChange={(v) => update("activeFieldTechnicians", v)} error={errors.activeFieldTechnicians} />
+                <InputField label="Total Employees" type="number" min="1" value={formData.totalEmployees} onChange={(v) => update("totalEmployees", v)} error={errors.totalEmployees} />
+                <InputField label="Active Field Technicians" type="number" min="0" value={formData.activeFieldTechnicians} onChange={(v) => update("activeFieldTechnicians", v)} error={errors.activeFieldTechnicians} />
               </div>
               <InputField label="Regulatory / Standard Affiliations" value={formData.regulatoryAffiliations} onChange={(v) => update("regulatoryAffiliations", v)} required={false} />
               <div className="grid sm:grid-cols-2 gap-4">

@@ -60,7 +60,7 @@ export const JOINING_REASONS = [
 ] as const;
 
 export const CORE_BUSINESS_ACTIVITIES = [
-  { value: CoreBusinessActivity.HVACR_CONTRACTOR, label: "HVAC-R Contractor" },
+  { value: CoreBusinessActivity.HVACR_CONTRACTOR, label: "HVACR Contractor" },
   { value: CoreBusinessActivity.EQUIPMENT_MANUFACTURER, label: "Equipment Manufacturer" },
   { value: CoreBusinessActivity.WHOLESALER_DISTRIBUTOR, label: "Wholesaler/Distributor" },
   { value: CoreBusinessActivity.CONSULTING_ENGINEERS, label: "Consulting Engineers" },

@@ -23,7 +23,7 @@ export async function GET() {
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv",
-      "Content-Disposition": `attachment; filename="hevacraz-members-${new Date().toISOString().split("T")[0]}.csv"`,
+      "Content-Disposition": `attachment; filename="HEVACRAZ-members-${new Date().toISOString().split("T")[0]}.csv"`,
     },
   });
 }

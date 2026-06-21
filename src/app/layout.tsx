@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "HEVACRAZ Membership Registry",
-  description: "Heating, Ventilation, Air Conditioning and Refrigeration Association of Zambia. Membership Registry Application",
+  description: "Heating, Ventilation, Air Conditioning and Refrigeration Association of Zimbabwe. Membership Registry Application",
 };
 
 export default function RootLayout({

@@ -53,8 +53,8 @@ export default function Home() {
               Join HEVACRAZ Today
             </h2>
             <p className="text-lg sm:text-xl text-teal-100/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              The Heating, Ventilation, Air Conditioning and Refrigeration Association of Zambia
-              uniting professionals and companies across the HVACR industry.
+	              The Heating, Ventilation, Air Conditioning and Refrigeration Association of Zimbabwe
+	              uniting professionals and companies across the HVACR industry.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -84,21 +84,21 @@ export default function Home() {
                 Membership Categories
               </h3>
               <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-                Choose the membership type that best fits your role in the HVAC-R industry
+                Choose the membership type that best fits your role in the HVACR industry
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
                   title: "Student",
-                  desc: "For individuals enrolled in HVAC-R related programs at recognized institutions.",
+                  desc: "For individuals enrolled in HVACR related programs at recognized institutions.",
                   icon: "🎓",
                   color: "from-violet-500 to-purple-600",
                   bg: "bg-violet-50",
                 },
                 {
                   title: "Technician",
-                  desc: "For qualified HVAC-R technicians with verifiable industry experience.",
+                  desc: "For qualified HVACR technicians with verifiable industry experience.",
                   icon: "🔧",
                   color: "from-blue-500 to-blue-600",
                   bg: "bg-blue-50",
@@ -206,7 +206,7 @@ export default function Home() {
               Ready to Join?
             </h3>
             <p className="text-teal-100/90 text-lg mb-8 max-w-lg mx-auto">
-              Take the first step toward becoming a member of Zambia&apos;s leading HVAC-R association.
+              Take the first step toward becoming a member of Zimbabwe&apos;s leading HVACR association.
             </p>
             <Link
               href="/apply"
@@ -232,7 +232,7 @@ export default function Home() {
               <span className="font-bold text-white text-lg">HEVACRAZ</span>
               </div>
               <p className="text-sm text-teal-300/70 leading-relaxed">
-                Heating, Ventilation, Air Conditioning and Refrigeration Association of Zambia
+                Heating, Ventilation, Air Conditioning and Refrigeration Association of Zimbabwe
               </p>
             </div>
             <div>
